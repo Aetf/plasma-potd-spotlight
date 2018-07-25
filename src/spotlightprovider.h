@@ -24,32 +24,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PLASMA_POTD_UNSPLASH_PROVIDER_H
-#define PLASMA_POTD_UNSPLASH_PROVIDER_H
+#ifndef PLASMA_POTD_SPOTLIGHT_PROVIDER_H
+#define PLASMA_POTD_SPOTLIGHT_PROVIDER_H
 
 #include <QImage>
 #include <plasma/potdprovider/potdprovider.h>
 
+class KJob;
 /**
- * This class provides the image for the Bing's homepage
- * url is obtained from http://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1
+ * This class provides the image from Microsoft's Windows Spotlight
+ * URL is obtained from:
+ * https://github.com/KoalaBR/spotlight/blob/3164a43684dcadb751ce9a38db59f29453acf2fe/spotlightprovider.cpp#L17
+ * https://github.com/ORelio/Spotlight-Downloader
  */
-class UnsplashProvider : public PotdProvider
+class SpotlightProvider : public PotdProvider
 {
     Q_OBJECT
 public:
     /**
-     * Creates a new Unsplash provider.
+     * Creates a new Spotlight provider.
      *
      * @param date The date for which the image shall be fetched.
      * @param parent The parent object.
      */
-    UnsplashProvider(QObject *parent, const QVariantList &args);
+    SpotlightProvider(QObject *parent, const QVariantList &args);
 
     /**
-     * Destroys the Bing provider.
+     * Destroys the Spotlight provider.
      */
-    ~UnsplashProvider() override;
+    ~SpotlightProvider() override;
 
     /**
      * Returns the requested image.
@@ -64,7 +67,7 @@ private:
     void imageRequestFinished(KJob *job);
 
 private:
-    QImage mImage;
+    QImage m_image;
 };
 
-#endif // PLASMA_POTD_UNSPLASH_PROVIDER_H
+#endif // PLASMA_POTD_SPOTLIGHT_PROVIDER_H

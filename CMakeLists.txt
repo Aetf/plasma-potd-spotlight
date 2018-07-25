@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 
-project(plasma_potd_unsplash LANGUAGES C CXX)
+project(plasma_potd_spotlight LANGUAGES C CXX)
 set(PROJECT_VERSION "1.0.0")
 set(PROJECT_VERSION_MAJOR 1)
 
@@ -39,7 +39,7 @@ set_package_properties(PlasmaPotdProvider PROPERTIES TYPE REQUIRED PURPOSE
     "For core Plasma potd library"
 )
 
-find_package(Qt5 CONFIG REQUIRED COMPONENTS
+find_package(Qt5 5.10 CONFIG REQUIRED COMPONENTS
     Core
     Gui
 )

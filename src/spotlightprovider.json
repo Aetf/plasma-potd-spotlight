@@ -1,0 +1,11 @@
+{
+  "KPlugin": {
+    "Description": "Spotlight Provider",
+    "Icon": "",
+    "Name": "Microsoft's Spotlight Picture of the Day",
+    "ServiceTypes": [
+      "PlasmaPoTD/Plugin"
+    ]
+  },
+  "X-KDE-PlasmaPoTDProvider-Identifier": "spotlight"
+}
