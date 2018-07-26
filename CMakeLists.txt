@@ -28,7 +28,7 @@ option(WITH_TESTS "Build test suite in default target" OFF)
 #---------------------------------------------------------------------------------------
 # Extra cmake helpers
 find_package(ECM REQUIRED NO_MODULE)
-set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+list(APPEND CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 include(KDECompilerSettings NO_POLICY_SCOPE)
 include(KDEInstallDirs)
 include(KDECMakeSettings)
@@ -45,16 +45,13 @@ find_package(Qt5 5.10 CONFIG REQUIRED COMPONENTS
     Core
     Gui
 )
-if(WITH_TESTS)
-    include(ECMAddTests)
-    find_package(Qt5 5.10 CONFIG REQUIRED COMPONENTS
-        Test
-    )
-endif(WITH_TESTS)
 
 find_package(KF5 REQUIRED COMPONENTS
     KIO
 )
+
+# Bundled thirdparty code
+add_subdirectory(thirdparty)
 
 add_feature_info(Tests WITH_TESTS "build unit tests")
 feature_summary(INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES WHAT ALL)

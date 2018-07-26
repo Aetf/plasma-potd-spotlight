@@ -9,6 +9,10 @@ target_link_libraries(spotlightprovider_static
     Qt5::Gui
     Qt5::Core
 )
+target_compile_options(spotlightprovider_static
+    PUBLIC
+        -fexceptions
+)
 
 add_library(plasma_potd_spotlightprovider MODULE spotlightprovider_plugin.cpp)
 target_link_libraries(plasma_potd_spotlightprovider

@@ -23,10 +23,33 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "test_spotlightprovider.h"
 
-void TestSpotlightProvider::parseJsonReply()
+#ifndef PLASMA_POTD_SPOTLIGHT_CATCH2_QT_H
+#define PLASMA_POTD_SPOTLIGHT_CATCH2_QT_H
+
+#include <catch2/catch.hpp>
+
+#include <QUrl>
+#include <QString>
+
+namespace Catch {
+template<>
+struct StringMaker<QUrl>
 {
-}
+    static std::string convert(QUrl const &value)
+    {
+        return value.toDisplayString().toStdString();
+    }
+};
 
-QTEST_GUILESS_MAIN(TestSpotlightProvider)
+template<>
+struct StringMaker<QString>
+{
+    static std::string convert(QString const &value)
+    {
+        return value.toStdString();
+    }
+};
+} // namespace Catch
+
+#endif // PLASMA_POTD_SPOTLIGHT_CATCH2_QT_H

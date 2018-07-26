@@ -36,54 +36,13 @@
 #include <QLocale>
 #include <QUrlQuery>
 
-namespace {
-QString getCountryLetters(const QLocale &locale)
-{
-    return locale.name().split('_').at(1).toLower();
-}
-
-QUrl buildUrl(const QDate &date)
-{
-    auto locale = QLocale::system();
-
-    QUrl url(QLatin1Literal("https://arc.msn.com/v3/Delivery/Cache"));
-    QUrlQuery query;
-    // Purpose unknown
-    //    query.addQueryItem(QLatin1Literal("lo"), QLatin1Literal("80217"));
-    // Purpose unknown
-    //    query.addQueryItem(QLatin1Literal("rafb"), QLatin1Literal("0"));
-    // User agent
-    //    query.addQueryItem(QLatin1Literal("ua"), QLatin1Literal("WindowsShellClient"));
-    // Purpose unknown, must be this value,
-    query.addQueryItem(QLatin1Literal("pid"), QLatin1Literal("209567"));
-    // Output format
-    query.addQueryItem(QLatin1Literal("fmt"), QLatin1Literal("json"));
-    // Screen width in pixels
-    query.addQueryItem(QLatin1Literal("disphorzres"), QLatin1Literal("9999"));
-    // Screen height in pixels
-    query.addQueryItem(QLatin1Literal("dispvertres"), QLatin1Literal("9999"));
-    // Locale
-    query.addQueryItem(QLatin1Literal("pl"), locale.name());
-    // Language
-    query.addQueryItem(QLatin1Literal("lc"), locale.name());
-    // Country
-    query.addQueryItem(QLatin1Literal("ctry"), getCountryLetters(locale));
-    // Time
-    QDateTime dateTime = QDateTime::currentDateTime();
-    dateTime.setDate(date);
-    query.addQueryItem(QLatin1Literal("time"), dateTime.toUTC().toString(Qt::ISODate));
-
-    url.setQuery(query);
-
-    return url;
-}
-
-} // namespace
-
 SpotlightProvider::SpotlightProvider(QObject *parent, const QVariantList &args)
     : PotdProvider(parent, args)
 {
-    const auto url = buildUrl(date());
+    auto dateTime = QDateTime::currentDateTime();
+    dateTime.setDate(date());
+    const auto url = SpotlightParser::buildUrl(dateTime);
+
     auto job = KIO::storedGet(url, KIO::NoReload, KIO::HideProgressInfo);
     connect(job, &KIO::StoredTransferJob::finished, this, &SpotlightProvider::pageRequestFinished);
 }
@@ -104,23 +63,10 @@ void SpotlightProvider::pageRequestFinished(KJob *_job)
         return;
     }
 
-    auto json = QJsonDocument::fromJson(job->data());
-    auto imageItemStr = json[QLatin1Literal("batchrsp")][QLatin1Literal("items")][0][QLatin1Literal("item")];
-    if (!imageItemStr.isString()) {
-        return;
-    }
+    const auto imageItem = SpotlightParser::parseReply(job->data());
+    const auto imageUrl = SpotlightParser::extractImageUrl(imageItem);
 
-    auto imageItem = QJsonDocument::fromJson(imageItemStr.toString().toUtf8());
-
-    // TODO: detect landscape or portrait
-//    constexpr const auto keyP = QLatin1Literal("image_fullscreen_001_portrait");
-    constexpr const auto keyL = QLatin1Literal("image_fullscreen_001_landscape");
-    auto imageUrl = imageItem[keyL][QLatin1Literal("u")];
-    if (!imageUrl.isString() || imageUrl.toString().isEmpty()) {
-        return;
-    }
-
-    auto imageJob = KIO::storedGet(QUrl(imageUrl.toString()), KIO::NoReload, KIO::HideProgressInfo);
+    auto imageJob = KIO::storedGet(imageUrl, KIO::NoReload, KIO::HideProgressInfo);
     connect(imageJob, &KIO::StoredTransferJob::finished, this, &SpotlightProvider::imageRequestFinished);
     emit_error.dismiss();
 }
@@ -141,4 +87,67 @@ void SpotlightProvider::imageRequestFinished(KJob *_job)
 
     emit_error.dismiss();
     emit finished(this);
+}
+
+QString SpotlightParser::getCountryLetters(const QLocale &locale)
+{
+    return locale.name().split('_').at(1).toLower();
+}
+
+QUrl SpotlightParser::buildUrl(const QDateTime &dateTime, const QLocale &locale)
+{
+    QUrl url(QLatin1Literal("https://arc.msn.com/v3/Delivery/Cache"));
+    QUrlQuery query;
+    // Purpose unknown
+    //    query.addQueryItem(QLatin1Literal("lo"), QLatin1Literal("80217"));
+    // Purpose unknown
+    //    query.addQueryItem(QLatin1Literal("rafb"), QLatin1Literal("0"));
+    // User agent
+    //    query.addQueryItem(QLatin1Literal("ua"), QLatin1Literal("WindowsShellClient"));
+    // Purpose unknown, must be this value,
+    query.addQueryItem(QLatin1Literal("pid"), QLatin1Literal("209567"));
+    // Output format
+    query.addQueryItem(QLatin1Literal("fmt"), QLatin1Literal("json"));
+    // Screen width in pixels
+    query.addQueryItem(QLatin1Literal("disphorzres"), QLatin1Literal("9999"));
+    // Screen height in pixels
+    query.addQueryItem(QLatin1Literal("dispvertres"), QLatin1Literal("9999"));
+    // Locale
+    query.addQueryItem(QLatin1Literal("pl"), locale.name().replace("_", "-"));
+    // Language
+    query.addQueryItem(QLatin1Literal("lc"), locale.name().replace("_", "-"));
+    // Country
+    query.addQueryItem(QLatin1Literal("ctry"), getCountryLetters(locale));
+    // Time
+    query.addQueryItem(QLatin1Literal("time"), dateTime.toUTC().toString(Qt::ISODate));
+
+    url.setQuery(query);
+
+    return url;
+}
+
+QString SpotlightParser::parseReply(QByteArray ba)
+{
+    auto json = QJsonDocument::fromJson(ba);
+    auto imageItemStr = json[QLatin1Literal("batchrsp")][QLatin1Literal("items")][0][QLatin1Literal("item")];
+    if (!imageItemStr.isString()) {
+        return {};
+    }
+
+    return imageItemStr.toString();
+}
+
+QUrl SpotlightParser::extractImageUrl(QString s)
+{
+    auto imageItem = QJsonDocument::fromJson(s.toUtf8());
+
+    // TODO: detect landscape or portrait
+//    constexpr const auto keyP = QLatin1Literal("image_fullscreen_001_portrait");
+    constexpr const auto keyL = QLatin1Literal("image_fullscreen_001_landscape");
+    auto imageUrl = imageItem[QLatin1Literal("ad")][keyL][QLatin1Literal("u")];
+    if (!imageUrl.isString() || imageUrl.toString().isEmpty()) {
+        return {};
+    }
+
+    return QUrl(imageUrl.toString());
 }

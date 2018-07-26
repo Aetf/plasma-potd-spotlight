@@ -23,16 +23,15 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef PLASMA_POTD_SPOTLIGHT_TEST_SPOTLIGHTPROVIDER_H
-#define PLASMA_POTD_SPOTLIGHT_TEST_SPOTLIGHTPROVIDER_H
+#include <QCoreApplication>
 
-#include <QtTest/QtTest>
+#define CATCH_CONFIG_RUNNER
+#include <catch2/catch.hpp>
 
-class TestSpotlightProvider : public QObject
+int main(int argc, char **argv)
 {
-    Q_OBJECT
-private slots:
-    void parseJsonReply();
-};
+    QCoreApplication app(argc, argv);
+    const int res = Catch::Session().run(argc, argv);
+    return (res < 0xff ? res : 0xff);
+}
 
-#endif //PLASMA_POTD_SPOTLIGHT_TEST_SPOTLIGHTPROVIDER_H
