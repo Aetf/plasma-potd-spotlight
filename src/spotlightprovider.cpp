@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, aetf <email>
+ * Copyright (c) 2018, aetf <aetf at unlimitedcodeworks dot xyz>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,6 @@
 #include "scoped_guard.h"
 
 #include <KIO/StoredTransferJob>
-#include <KPluginFactory>
 #include <QDate>
 #include <QDateTime>
 #include <QJsonArray>
@@ -143,7 +142,3 @@ void SpotlightProvider::imageRequestFinished(KJob *_job)
     emit_error.dismiss();
     emit finished(this);
 }
-
-K_PLUGIN_FACTORY_WITH_JSON(SpotlightProviderFactory, "spotlightprovider.json",
-                           registerPlugin<SpotlightProvider>();)
-#include "spotlightprovider.moc"

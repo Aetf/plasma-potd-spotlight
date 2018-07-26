@@ -19,19 +19,21 @@ include(cmake/Defaults.cmake)
 include(cmake/BuildTypes.cmake)
 
 #---------------------------------------------------------------------------------------
+# Options
+#---------------------------------------------------------------------------------------
+option(WITH_TESTS "Build test suite in default target" OFF)
+
+#---------------------------------------------------------------------------------------
 # Find packages
 #---------------------------------------------------------------------------------------
 # Extra cmake helpers
-find_package(ECM ${KF5_MIN_VERSION} REQUIRED NO_MODULE)
+find_package(ECM REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+include(KDECompilerSettings NO_POLICY_SCOPE)
 include(KDEInstallDirs)
 include(KDECMakeSettings)
-include(KDECompilerSettings NO_POLICY_SCOPE)
 include(ECMQtDeclareLoggingCategory)
 include(ECMInstallIcons)
-include(KDEPackageAppTemplates)
-include(GenerateExportHeader)
-include(CMakePackageConfigHelpers)
 
 # For Plasma::PotdProvider
 find_package(PlasmaPotdProvider REQUIRED)
@@ -43,11 +45,18 @@ find_package(Qt5 5.10 CONFIG REQUIRED COMPONENTS
     Core
     Gui
 )
+if(WITH_TESTS)
+    include(ECMAddTests)
+    find_package(Qt5 5.10 CONFIG REQUIRED COMPONENTS
+        Test
+    )
+endif(WITH_TESTS)
 
 find_package(KF5 REQUIRED COMPONENTS
     KIO
 )
 
+add_feature_info(Tests WITH_TESTS "build unit tests")
 feature_summary(INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES WHAT ALL)
 
 #---------------------------------------------------------------------------------------
@@ -57,3 +66,7 @@ feature_summary(INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES WHAT A
 include(cmake/CompileOptions.cmake)
 
 add_subdirectory(src)
+
+if(WITH_TESTS)
+    add_subdirectory(tests)
+endif(WITH_TESTS)

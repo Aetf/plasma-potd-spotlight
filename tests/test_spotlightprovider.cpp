@@ -23,41 +23,10 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "test_spotlightprovider.h"
 
-#ifndef PLASMA_POTD_SPOTLIGHT_SCOPED_GUARD_H
-#define PLASMA_POTD_SPOTLIGHT_SCOPED_GUARD_H
-
-#include <functional>
-#include <optional>
-
-template<typename Callable>
-class scope_guard
+void TestSpotlightProvider::parseJsonReply()
 {
-public:
-    scope_guard(scope_guard &&) = default;
+}
 
-    scope_guard(Callable &&func)
-        : f(std::forward<Callable>(func))
-    {
-    }
-
-    ~scope_guard()
-    {
-        if (f) {
-            std::invoke(*f);
-        }
-    }
-
-    void dismiss() noexcept
-    {
-        f.reset();
-    }
-
-private:
-    scope_guard(const scope_guard &) = delete;
-    void operator=(const scope_guard &) = delete;
-
-    std::optional<Callable> f;
-};
-
-#endif // PLASMA_POTD_SPOTLIGHT_SCOPED_GUARD_H
+QTEST_GUILESS_MAIN(TestSpotlightProvider)
