@@ -1,9 +1,11 @@
 set(unittest_SRCS
-    test_spotlightparser
+    test_spotlightparser.cpp
+    test_spotlightprovider.cpp
 )
 
 set(unittest_LIBRARIES
     spotlightprovider_static
+    Qt5::Test
 )
 
 # The Catch2 test runner

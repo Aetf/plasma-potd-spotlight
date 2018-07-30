@@ -41,14 +41,14 @@ set_package_properties(PlasmaPotdProvider PROPERTIES TYPE REQUIRED PURPOSE
     "For core Plasma potd library"
 )
 
-find_package(Qt5 5.10 CONFIG REQUIRED COMPONENTS
-    Core
-    Gui
-)
+set(QT5_COMPONENTS Core Gui)
+if(WITH_TESTS)
+    list(APPEND QT5_COMPONENTS Test)
+endif(WITH_TESTS)
+find_package(Qt5 5.10 CONFIG REQUIRED COMPONENTS ${QT5_COMPONENTS})
 
-find_package(KF5 REQUIRED COMPONENTS
-    KIO
-)
+set(KF5_COMPONENTS KIO)
+find_package(KF5 REQUIRED COMPONENTS ${KF5_COMPONENTS})
 
 # Bundled thirdparty code
 add_subdirectory(thirdparty)

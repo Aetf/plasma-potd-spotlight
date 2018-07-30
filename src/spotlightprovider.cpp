@@ -31,9 +31,11 @@
 #include <KIO/StoredTransferJob>
 #include <QDate>
 #include <QDateTime>
+#include <QDebug>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QLocale>
+#include <QMetaMethod>
 #include <QUrlQuery>
 
 SpotlightProvider::SpotlightProvider(QObject *parent, const QVariantList &args)
@@ -86,6 +88,12 @@ void SpotlightProvider::imageRequestFinished(KJob *_job)
     }
 
     emit_error.dismiss();
+
+    auto finishSignal = QMetaMethod::fromSignal(&SpotlightProvider::finished);
+    if (!isSignalConnected(finishSignal)) {
+        qCritical() << "No listener found for the finished signal on SpotlightProvider, probably a data race "
+                       "in Potd data engine";
+    }
     emit finished(this);
 }
 
@@ -142,7 +150,7 @@ QUrl SpotlightParser::extractImageUrl(QString s)
     auto imageItem = QJsonDocument::fromJson(s.toUtf8());
 
     // TODO: detect landscape or portrait
-//    constexpr const auto keyP = QLatin1Literal("image_fullscreen_001_portrait");
+    //    constexpr const auto keyP = QLatin1Literal("image_fullscreen_001_portrait");
     constexpr const auto keyL = QLatin1Literal("image_fullscreen_001_landscape");
     auto imageUrl = imageItem[QLatin1Literal("ad")][keyL][QLatin1Literal("u")];
     if (!imageUrl.isString() || imageUrl.toString().isEmpty()) {
