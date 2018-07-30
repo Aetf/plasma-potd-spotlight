@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.11)
 
 project(plasma_potd_spotlight LANGUAGES C CXX)
-set(PROJECT_VERSION "1.0.0")
+set(PROJECT_VERSION "1.0.1")
 set(PROJECT_VERSION_MAJOR 1)
 
 #---------------------------------------------------------------------------------------
