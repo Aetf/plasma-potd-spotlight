@@ -24,40 +24,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PLASMA_POTD_SPOTLIGHT_SCOPED_GUARD_H
-#define PLASMA_POTD_SPOTLIGHT_SCOPED_GUARD_H
+#ifndef PLASMA_POTD_SPOTLIGHT_CATCH2_QT_H
+#define PLASMA_POTD_SPOTLIGHT_CATCH2_QT_H
 
-#include <functional>
-#include <optional>
+#include <catch2/catch.hpp>
 
-template<typename Callable>
-class scope_guard
+#include <QUrl>
+#include <QString>
+
+namespace Catch {
+template<>
+struct StringMaker<QUrl>
 {
-public:
-    scope_guard(scope_guard &&) = default;
-
-    scope_guard(Callable &&func)
-        : f(std::forward<Callable>(func))
+    static std::string convert(QUrl const &value)
     {
+        return value.toDisplayString().toStdString();
     }
-
-    ~scope_guard()
-    {
-        if (f) {
-            std::invoke(*f);
-        }
-    }
-
-    void dismiss() noexcept
-    {
-        f.reset();
-    }
-
-private:
-    scope_guard(const scope_guard &) = delete;
-    void operator=(const scope_guard &) = delete;
-
-    std::optional<Callable> f;
 };
 
-#endif // PLASMA_POTD_SPOTLIGHT_SCOPED_GUARD_H
+template<>
+struct StringMaker<QString>
+{
+    static std::string convert(QString const &value)
+    {
+        return value.toStdString();
+    }
+};
+} // namespace Catch
+
+#endif // PLASMA_POTD_SPOTLIGHT_CATCH2_QT_H

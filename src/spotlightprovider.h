@@ -27,8 +27,46 @@
 #ifndef PLASMA_POTD_SPOTLIGHT_PROVIDER_H
 #define PLASMA_POTD_SPOTLIGHT_PROVIDER_H
 
-#include <QImage>
 #include <plasma/potdprovider/potdprovider.h>
+
+#include <QImage>
+#include <QLocale>
+#include <QJsonObject>
+
+/**
+ * @brief Construct the API call and parse the reply from Spotlight
+ */
+struct SpotlightParser
+{
+    /**
+     * @brief Get 2 letter lower case country code from a QLocale
+     * @param locale
+     * @return
+     */
+    static QString getCountryLetters(const QLocale &locale);
+
+    /**
+     * @brief Build the url to spotlight API endpoint with the given date
+     * @param date
+     * @param locale
+     * @return
+     */
+    static QUrl buildUrl(const QDateTime &dateTime, const QLocale &locale = QLocale::system());
+
+    /**
+     * @brief Parse reply and return image item as string
+     * @param ba
+     * @return
+     */
+    static QString parseReply(QByteArray ba);
+
+    /**
+     * @brief Extract image url from the image item
+     * @param ba
+     * @return
+     */
+    static QUrl extractImageUrl(QString s);
+};
 
 class KJob;
 /**
@@ -62,11 +100,19 @@ public:
      */
     QImage image() const override;
 
+    /**
+     * @brief For testing purposes.
+     * See https://softwareengineering.stackexchange.com/a/257721
+     * @tparam T
+     */
+    template<typename T>
+    struct access_by;
+    template<typename T>
+    friend struct access_by;
 private:
     void pageRequestFinished(KJob *job);
     void imageRequestFinished(KJob *job);
 
-private:
     QImage m_image;
 };
 

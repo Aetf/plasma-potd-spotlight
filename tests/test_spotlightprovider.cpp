@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Aetf <aetf at unlimitedcodeworks dot xyz>
+ * Copyright (c) 2018, $USER_NAME <email>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,40 +24,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PLASMA_POTD_SPOTLIGHT_SCOPED_GUARD_H
-#define PLASMA_POTD_SPOTLIGHT_SCOPED_GUARD_H
+#include "catch2_qt.h"
+#include "spotlightprovider.h"
 
-#include <functional>
-#include <optional>
+#include <catch2/catch.hpp>
 
-template<typename Callable>
-class scope_guard
+#include <QSignalSpy>
+
+TEST_CASE("SpotlightProvider can work in the plasma data engine", "[spotlight][data engine]")
 {
-public:
-    scope_guard(scope_guard &&) = default;
-
-    scope_guard(Callable &&func)
-        : f(std::forward<Callable>(func))
+    SECTION("Can download image")
     {
+        SpotlightProvider provider(nullptr, {});
+        QSignalSpy spy(&provider, &SpotlightProvider::finished);
+
+        spy.wait();
+        REQUIRE(spy.count() == 1);
+
+        REQUIRE(!provider.image().isNull());
     }
-
-    ~scope_guard()
-    {
-        if (f) {
-            std::invoke(*f);
-        }
-    }
-
-    void dismiss() noexcept
-    {
-        f.reset();
-    }
-
-private:
-    scope_guard(const scope_guard &) = delete;
-    void operator=(const scope_guard &) = delete;
-
-    std::optional<Callable> f;
-};
-
-#endif // PLASMA_POTD_SPOTLIGHT_SCOPED_GUARD_H
+}
